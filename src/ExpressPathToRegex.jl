@@ -163,7 +163,7 @@ function tokens_to_function(tokens)
         throw(ArgumentError(string("expected ", token.name, " to be defined")))
       end
       value = data[token.name]
-      
+
       if typeof(value).name.name == :Array
         if !token.repeat
           throw(ArgumentError(string(
@@ -349,7 +349,7 @@ function tokens_to_regex(tokens::Array; strict=false, match_end=true,
     route = route * ((strict && ends_with_slash) ? "" : "(?=\\/|\$)")
   end
 
-  return Regex("^" * route, flags(sensitive))
+  Regex("^" * route, flags(sensitive))
 end
 
 end # module
