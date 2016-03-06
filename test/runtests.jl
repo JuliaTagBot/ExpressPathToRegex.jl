@@ -141,7 +141,6 @@ begin "compile errors"
     toPath = ExpressPathToRegex.compile("/a/:b/c")
 
     "Expected \"b\" to be defined"
-    @test_throws ErrorException toPath()
     @test_throws ArgumentError toPath(nothing)
   end
 
