@@ -3199,7 +3199,7 @@
     ]
   ],
   [
-    "/:remote([\\w-.]+)/:user([\\w-]+)",
+    "/:remote([\\w.-]+)/:user([\\w-]+)",
     null,
     [
       {
@@ -3208,7 +3208,7 @@
         "delimiter":"/",
         "optional":false,
         "repeat":false,
-        "pattern":"[\\w-.]+"
+        "pattern":"[\\w.-]+"
       },
       {
         "name":"user",

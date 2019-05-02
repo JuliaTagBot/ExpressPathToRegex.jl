@@ -1,5 +1,5 @@
 using ExpressPathToRegex
-using Base.Test
+using Test
 using JSON
 
 tests = JSON.parsefile(dirname(@__FILE__) * "/tests.json")
@@ -19,8 +19,8 @@ let test_path = "/user/:id",
       "[^\\/]+?"
     )
 
-    begin "arguments"
-      begin "should accept an array of keys as the second argument"
+    begin # arguments"
+      begin # should accept an array of keys as the second argument"
         keys = []
         re, ret_keys = path_to_regex(test_path, keys, match_end=false)
 
@@ -29,7 +29,7 @@ let test_path = "/user/:id",
         @test exec(re, "/user/123/show")==["/user/123", "123"]
       end
 
-      begin "should work with keys as null"
+      begin # should work with keys as null"
         re, ret_keys = path_to_regex(test_path, match_end=false)
 
         @test ret_keys == [test_param]
@@ -37,16 +37,16 @@ let test_path = "/user/:id",
       end
     end
 
-    begin "tokens"
+    begin # tokens"
       tokens = ExpressPathToRegex.parse(test_path)
 
-      begin "should expose method to compile tokens to regexp"
+      begin # should expose method to compile tokens to regexp"
         re = ExpressPathToRegex.tokens_to_regex(tokens)
 
         @test exec(re, "/user/123")==["/user/123", "123"]
       end
 
-      begin "should expose method to compile tokens to a path function"
+      begin # should expose method to compile tokens to a path function"
         fn = ExpressPathToRegex.tokens_to_function(tokens)
 
         @test fn(Dict("id" => "123")) == "/user/123"
@@ -54,7 +54,7 @@ let test_path = "/user/:id",
     end
 end
 
-begin "rules"
+begin # rules"
   for test in tests
     path = test[1]
     opts = test[2]
@@ -84,11 +84,11 @@ begin "rules"
 
     # Parsing and compiling is only supported with string input.
     if typeof(path) <: AbstractString
-      begin "should parse"
+      begin # should parse"
         @test ExpressPathToRegex.parse(path) == tokens
       end
 
-      begin "compile"
+      begin # compile"
         toPath = ExpressPathToRegex.compile(path)
 
         for io in compileCases
@@ -109,18 +109,18 @@ begin "rules"
           end
 
           if output != nothing
-            begin "should compile using " * string(input)
+            begin # should compile using string(input)
               @test toPath(input) == output
             end
           else
-            begin "should not compile using " * string(input)
+            begin # should not compile using string(input)
               @test_throws ArgumentError toPath(input)
             end
           end
         end
       end
 
-      begin "match" * (opts != nothing ? " using " * string(opts) : "")
+      begin # match (opts != nothing ? " using " * string(opts) : "")
         for io in matchCases
           input = io[1]
           output = io[2]
@@ -136,39 +136,39 @@ begin "rules"
   end
 end
 
-begin "compile errors"
-  begin "should throw when a required param is undefined"
+begin # compile errors"
+  begin # should throw when a required param is undefined"
     toPath = ExpressPathToRegex.compile("/a/:b/c")
 
-    "Expected \"b\" to be defined"
+    # Expected "b" to be defined"
     @test_throws ArgumentError toPath(nothing)
   end
 
-  begin "should throw when it does not match the pattern"
+  begin # should throw when it does not match the pattern"
     toPath = ExpressPathToRegex.compile("/:foo(\\d+)")
 
-    "Expected \"foo\" to match \"\\d+\""
+    # Expected "foo" to match "\d+"
     @test_throws ArgumentError toPath(Dict("foo"=>"abc"))
   end
 
-  begin "should throw when expecting a repeated value"
+  begin # should throw when expecting a repeated value"
     toPath = ExpressPathToRegex.compile("/:foo+")
 
-    "Expected \"foo\" to not be empty"
+    # Expected "foo" to not be empty"
     @test_throws ArgumentError toPath(Dict("foo"=>[]))
   end
 
-  begin "should throw when not expecting a repeated value"
+  begin # should throw when not expecting a repeated value"
     toPath = ExpressPathToRegex.compile("/:foo")
 
-    "Expected \"foo\" to not repeat"
+    # Expected "foo" to not repeat"
     @test_throws ArgumentError toPath(Dict("foo"=>[]))
   end
 
-  begin "should throw when repeated value does not match"
+  begin # should throw when repeated value does not match"
     toPath = ExpressPathToRegex.compile("/:foo(\\d+)+")
 
-    "Expected all \"foo\" to match \"\\d+\""
+    # Expected all "foo" to match "\d+"
     @test_throws ArgumentError toPath(Dict("foo"=>[1, 2, 3, 'a']))
   end
 end

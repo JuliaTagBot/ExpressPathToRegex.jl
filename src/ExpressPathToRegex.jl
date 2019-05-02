@@ -18,7 +18,7 @@ path_regex = Regex(join([
   "([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^()])+)\\))?|\\(((?:\\\\.|[^()])+)\\))([+*?])?|(\\*))"
 ], "|"))
 
-immutable Token
+struct Token
   name::AbstractString
   prefix::AbstractString
   delimiter::AbstractString
@@ -28,11 +28,11 @@ immutable Token
 end
 
 Token(name::AbstractString,
-      prefix::Union{AbstractString, Void},
-      delimiter::Union{AbstractString, Void},
+      prefix::Union{AbstractString, Nothing},
+      delimiter::Union{AbstractString, Nothing},
       optional::Bool,
       repeat::Bool,
-      pattern::Union{AbstractString, Void}) = Token(
+      pattern::Union{AbstractString, Nothing}) = Token(
         name,
         prefix==nothing ? "" : prefix,
         delimiter==nothing ? "" : delimiter,
@@ -43,7 +43,7 @@ Token(name::AbstractString,
 
 function ==(a::Token, b::Token)
   @assert length(fieldnames(Token))==6
-  a.name == b.name && 
+  a.name == b.name &&
   a.prefix == b.prefix &&
   a.delimiter == b.delimiter &&
   a.optional == b.optional &&
@@ -145,7 +145,7 @@ function tokens_to_function(tokens)
     nothing
   end
 
-  return (obj::Union{Dict, Void}) -> begin
+  return (obj::Union{Dict, Nothing}) -> begin
     path = ""
     data = typeof(obj) <: Dict ? obj : Dict()
 
@@ -167,7 +167,7 @@ function tokens_to_function(tokens)
       if typeof(value).name.name == :Array
         if !token.repeat
           throw(ArgumentError(string(
-            "Expected \"", token.name, "\" to not repeat, but received \"", 
+            "Expected \"", token.name, "\" to not repeat, but received \"",
             value, "\""
           )))
         end
@@ -216,12 +216,12 @@ end
 """
 Escape a regular expression string.
 """
-escape_string(str) = replace(str, r"([.+*?=^!:${}()[\]|\/])", s"\\\g<1>")
+escape_string(str) = replace(str, r"([.+*?=^!:${}()[\]|\/])" => s"\\\g<1>")
 
 """
 Escape the capturing group by escaping special characters and meaning.
 """
-escape_group(group) = replace(group, r"([=!:$\/()])", s"\\\g<1>")
+escape_group(group) = replace(group, r"([=!:$\/()])" => s"\\\g<1>")
 
 """
 Get the flags for a regexp from the options.
@@ -256,7 +256,7 @@ An empty array can be passed in for the keys, which will hold the
 placeholder key descriptions. For example, using `/user/:id`, `keys` will
 contain `[{ name: 'id', delimiter: '/', optional: false, repeat: false }]`.
 """
-function path_to_regex(path::Array, keys=[]; strict=false, 
+function path_to_regex(path::Array, keys=[]; strict=false,
                           match_end=true, sensitive=false) # former arrayToRegexp
   parts = []
 
@@ -281,7 +281,7 @@ An empty array can be passed in for the keys, which will hold the
 placeholder key descriptions. For example, using `/user/:id`, `keys` will
 contain `[{ name: 'id', delimiter: '/', optional: false, repeat: false }]`.
 """
-function path_to_regex(path::AbstractString, keys=[]; strict=false, 
+function path_to_regex(path::AbstractString, keys=[]; strict=false,
                         match_end=true, sensitive=false) # former stringToRegexp
   tokens = parse(path)
   re = tokens_to_regex(tokens, strict=strict, match_end=match_end, sensitive=sensitive)
@@ -298,7 +298,7 @@ end
 """
 Expose a function for taking tokens and returning a RegExp.
 """
-function tokens_to_regex(tokens::Array; strict=false, match_end=true, 
+function tokens_to_regex(tokens::Array; strict=false, match_end=true,
                           sensitive=false)
   route = ""
   if typeof(tokens[end]) <: AbstractString && match(r"\/$", tokens[end]) != nothing
